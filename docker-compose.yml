@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile.dev
+    container_name: magicvial-frontend
+    restart: unless-stopped
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    networks:
+      - magicvial-network
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile.dev
+    container_name: magicvial-backend
+    restart: unless-stopped
+    volumes:
+      - ./apps/backend:/app
+      - /app/node_modules
+    ports:
+      - "4000:4000"
+      - "4001:4001"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - magicvial-network
+
+  postgres:
+    image: postgres:14-alpine
+    container_name: magicvial-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=magicvial
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - magicvial-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: magicvial-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - magicvial-network
+
+  localnet:
+    image: solanalabs/solana:stable
+    container_name: magicvial-solana-localnet
+    entrypoint: /bin/bash -c "solana-test-validator --log"
+    ports:
+      - "8899:8899"
+      - "8900:8900"
+    networks:
+      - magicvial-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: magicvial-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - magicvial-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  magicvial-network:
+    driver: bridge 

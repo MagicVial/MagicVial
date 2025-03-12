@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <style>
+    .title { font: bold 24px Arial; fill: #333; }
+    .subtitle { font: bold 18px Arial; fill: #555; }
+    .box { stroke: #000; stroke-width: 2; }
+    .label { font: 14px Arial; fill: #333; }
+    .arrow { stroke: #000; stroke-width: 2; marker-end: url(#arrowhead); }
+    .frontend { fill: #9945FF33; }
+    .backend { fill: #9945FF66; }
+    .blockchain { fill: #9945FF99; }
+    .game { fill: #9945FFCC; }
+  </style>
+  
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" class="title">MagicVial Technical Architecture</text>
+  
+  <!-- Frontend Layer -->
+  <rect x="50" y="100" width="700" height="100" rx="10" ry="10" class="box frontend" />
+  <text x="400" y="130" text-anchor="middle" class="subtitle">Frontend Layer</text>
+  <text x="150" y="160" class="label">User Interface</text>
+  <text x="320" y="160" class="label">Alchemist Dashboard</text>
+  <text x="520" y="160" class="label">Crafting Laboratory</text>
+  <text x="650" y="160" class="label">Wallet Integration</text>
+  
+  <!-- Backend Layer -->
+  <rect x="50" y="220" width="700" height="100" rx="10" ry="10" class="box backend" />
+  <text x="400" y="250" text-anchor="middle" class="subtitle">Backend Layer</text>
+  <text x="150" y="280" class="label">User Authentication</text>
+  <text x="320" y="280" class="label">Metadata Management</text>
+  <text x="520" y="280" class="label">Crafting Logic</text>
+  <text x="650" y="280" class="label">Transaction Preparation</text>
+  
+  <!-- Blockchain Layer -->
+  <rect x="50" y="340" width="700" height="100" rx="10" ry="10" class="box blockchain" />
+  <text x="400" y="370" text-anchor="middle" class="subtitle">Blockchain Layer</text>
+  <text x="150" y="400" class="label">Smart Contracts</text>
+  <text x="320" y="400" class="label">Token Mechanics</text>
+  <text x="520" y="400" class="label">Crafting Validation</text>
+  <text x="650" y="400" class="label">Guild Treasury</text>
+  
+  <!-- Game Mechanics Layer -->
+  <rect x="50" y="460" width="700" height="100" rx="10" ry="10" class="box game" />
+  <text x="400" y="490" text-anchor="middle" class="subtitle">Game Mechanics Layer</text>
+  <text x="150" y="520" class="label">Probability Systems</text>
+  <text x="320" y="520" class="label">Attribute Generation</text>
+  <text x="520" y="520" class="label">Seasonal Events</text>
+  <text x="650" y="520" class="label">Progression Tracking</text>
+  
+  <!-- Arrows -->
+  <line x1="400" y1="200" x2="400" y2="220" class="arrow" />
+  <line x1="400" y1="320" x2="400" y2="340" class="arrow" />
+  <line x1="400" y1="440" x2="400" y2="460" class="arrow" />
+  
+  <!-- External Systems -->
+  <rect x="50" y="580" width="200" height="40" rx="5" ry="5" class="box" fill="#eee" />
+  <text x="150" y="605" text-anchor="middle" class="label">Solana Network</text>
+  
+  <rect x="300" y="580" width="200" height="40" rx="5" ry="5" class="box" fill="#eee" />
+  <text x="400" y="605" text-anchor="middle" class="label">NFT Marketplaces</text>
+  
+  <rect x="550" y="580" width="200" height="40" rx="5" ry="5" class="box" fill="#eee" />
+  <text x="650" y="605" text-anchor="middle" class="label">Community Tools</text>
+  
+  <line x1="150" y1="560" x2="150" y2="580" class="arrow" />
+  <line x1="400" y1="560" x2="400" y2="580" class="arrow" />
+  <line x1="650" y1="560" x2="650" y2="580" class="arrow" />
+</svg> 

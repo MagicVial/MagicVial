@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="#0F1429" />
+  <!-- Magic Vial -->
+  <path d="M85,50 L85,80 L65,120 C60,130 60,140 70,150 C80,160 120,160 130,150 C140,140 140,130 135,120 L115,80 L115,50 Z"
+	    fill="none"
+	    stroke="#9945FF"
+	    stroke-width="3" />
+  <!-- Liquid in vial -->
+  <path d="M85,80 L65,120 C60,130 60,140 70,150 C80,160 120,160 130,150 C140,140 140,130 135,120 L115,80 Z"
+	    fill="#9945FF"
+	    fill-opacity="0.4" />
+  <!-- Static Bubbles (Innovation/Magic) -->
+  <circle cx="90" cy="105" r="4" fill="#9945FF" fill-opacity="0.8" />
+  <circle cx="100" cy="115" r="3" fill="#9945FF" fill-opacity="0.8" />
+  <circle cx="110" cy="100" r="2" fill="#9945FF" fill-opacity="0.8" />
+  <!-- Vial Cap -->
+  <rect x="85" y="50" width="30" height="5" fill="#9945FF" rx="2" ry="2" />
+  <!-- Subtle glow effect -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#9945FF" stroke-width="1" stroke-opacity="0.3" />
+</svg> 
