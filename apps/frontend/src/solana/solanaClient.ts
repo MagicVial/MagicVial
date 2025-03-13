@@ -6,34 +6,31 @@ import {
   Keypair,
   TransactionInstruction,
   SystemProgram,
-  SYSVAR_RENT_PUBKEY,
-  SYSVAR_CLOCK_PUBKEY
 } from '@solana/web3.js';
 import { 
   Program, 
-  Provider, 
   BN, 
-  web3,
-  utils,
-  Idl
+  Idl,
+  AnchorProvider
 } from '@project-serum/anchor';
 import {
   TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddress,
-  createAssociatedTokenAccountInstruction,
-  createMintToInstruction
 } from '@solana/spl-token';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 
-// 定义合约程序ID
+// Define constants that might be missing from imports
+const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+const SYSVAR_RENT_PUBKEY = new PublicKey('SysvarRent111111111111111111111111111111111');
+const SYSVAR_CLOCK_PUBKEY = new PublicKey('SysvarC1ock11111111111111111111111111111111');
+
+// Define contract program IDs
 const MATERIAL_PROGRAM_ID = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS');
 const RECIPE_PROGRAM_ID = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS');
 const CRAFTING_PROGRAM_ID = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS');
 const GUILD_PROGRAM_ID = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS');
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
 
-// 物料类型枚举
+// Material type enum
 export enum MaterialType {
   Basic = 'Basic',
   Rare = 'Rare',
@@ -41,7 +38,7 @@ export enum MaterialType {
   Mysterious = 'Mysterious'
 }
 
-// 稀有度枚举
+// Rarity enum
 export enum Rarity {
   Common = 'Common',
   Rare = 'Rare',
@@ -49,7 +46,7 @@ export enum Rarity {
   Legendary = 'Legendary'
 }
 
-// 配方难度枚举
+// Recipe difficulty enum
 export enum RecipeDifficulty {
   Beginner = 0,
   Intermediate = 1,
@@ -57,7 +54,7 @@ export enum RecipeDifficulty {
   Master = 3
 }
 
-// 合成状态枚举
+// Crafting status enum
 export enum CraftingStatus {
   InProgress = 0,
   Completed = 1,
@@ -65,7 +62,7 @@ export enum CraftingStatus {
   Cancelled = 3
 }
 
-// 工会角色枚举
+// Guild role enum
 export enum GuildRole {
   Member = 0,
   Contributor = 1,
@@ -73,7 +70,7 @@ export enum GuildRole {
   Founder = 3
 }
 
-// 材料类型接口
+// Material type interface
 export interface MaterialData {
   mint: PublicKey;
   materialType: string;
@@ -86,7 +83,7 @@ export interface MaterialData {
   isActive: boolean;
 }
 
-// 配方类型接口
+// Recipe type interface
 export interface RecipeData {
   name: string;
   description: string;
@@ -105,13 +102,13 @@ export interface RecipeData {
   timesCrafted: BN;
 }
 
-// 材料配方组成接口
+// Recipe ingredient interface
 export interface IngredientData {
   materialMint: PublicKey;
   quantity: BN;
 }
 
-// 合成记录接口
+// Crafting record interface
 export interface CraftingData {
   recipe: PublicKey;
   recipeCrafting: PublicKey;
@@ -124,13 +121,13 @@ export interface CraftingData {
   inputMaterials: MaterialInputData[];
 }
 
-// 材料输入接口
+// Material input interface
 export interface MaterialInputData {
   materialMint: PublicKey;
   amount: BN;
 }
 
-// 工会数据接口
+// Guild data interface
 export interface GuildData {
   name: string;
   description: string;
@@ -145,7 +142,7 @@ export interface GuildData {
   reputationCoefficient: number;
 }
 
-// 会员身份接口
+// Membership interface
 export interface MembershipData {
   guild: PublicKey;
   member: PublicKey;
@@ -156,7 +153,7 @@ export interface MembershipData {
   isActive: boolean;
 }
 
-// 工会任务接口
+// Guild quest interface
 export interface GuildQuestData {
   guild: PublicKey;
   creator: PublicKey;
@@ -184,22 +181,18 @@ class SolanaClient {
     this.connection = new Connection(rpcUrl, 'confirmed');
   }
 
-  // 设置钱包
+  // Set wallet
   setWallet(wallet: WalletContextState) {
     this.wallet = wallet;
   }
 
-  // 设置程序IDLs
+  // Set program IDLs
   setProgramIdls(materialIdl: Idl, recipeIdl: Idl, craftingIdl: Idl, guildIdl: Idl) {
     if (!this.wallet) {
-      throw new Error('钱包尚未设置');
+      throw new Error('Wallet has not been set');
     }
     
-    const provider = new Provider(
-      this.connection,
-      this.wallet as any,
-      { commitment: 'confirmed' }
-    );
+    const provider = new AnchorProvider(this.connection, this.wallet, { commitment: 'confirmed' });
     
     this.materialProgram = new Program(materialIdl, MATERIAL_PROGRAM_ID, provider);
     this.recipeProgram = new Program(recipeIdl, RECIPE_PROGRAM_ID, provider);
@@ -207,20 +200,20 @@ class SolanaClient {
     this.guildProgram = new Program(guildIdl, GUILD_PROGRAM_ID, provider);
   }
 
-  // 检查程序是否已初始化
+  // Check if programs are initialized
   private checkPrograms() {
     if (!this.materialProgram || !this.recipeProgram || !this.craftingProgram || !this.guildProgram) {
-      throw new Error('程序IDL尚未设置');
+      throw new Error('Programs not initialized. Call setProgramIdls first');
     }
     
     if (!this.wallet || !this.wallet.publicKey) {
-      throw new Error('钱包未连接');
+      throw new Error('Wallet not connected');
     }
   }
 
-  // ========== 材料系统接口 ==========
+  // ========== Material system interface ==========
 
-  // 初始化材料系统
+  // Initialize material system
   async initializeMaterialSystem(): Promise<string> {
     this.checkPrograms();
     
@@ -244,12 +237,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('初始化材料系统失败:', error);
+      console.error('Failed to initialize material system:', error);
       throw error;
     }
   }
 
-  // 创建材料NFT
+  // Create material NFT
   async createMaterial(
     mint: PublicKey,
     name: string,
@@ -298,12 +291,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('创建材料失败:', error);
+      console.error('Failed to create material:', error);
       throw error;
     }
   }
 
-  // 铸造材料NFT
+  // Mint material NFT
   async mintMaterial(
     materialMint: PublicKey,
     amount: number
@@ -345,12 +338,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('铸造材料失败:', error);
+      console.error('Failed to mint material:', error);
       throw error;
     }
   }
 
-  // 查询材料信息
+  // Get material information
   async getMaterial(materialMint: PublicKey): Promise<MaterialData> {
     this.checkPrograms();
     
@@ -363,14 +356,14 @@ class SolanaClient {
       const material = await this.materialProgram!.account.material.fetch(materialAddress);
       return material as unknown as MaterialData;
     } catch (error) {
-      console.error('查询材料失败:', error);
+      console.error('Failed to get material information:', error);
       throw error;
     }
   }
 
-  // ========== 配方系统接口 ==========
+  // ========== Recipe system interface ==========
 
-  // 初始化配方系统
+  // Initialize recipe system
   async initializeRecipeSystem(): Promise<string> {
     this.checkPrograms();
     
@@ -394,12 +387,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('初始化配方系统失败:', error);
+      console.error('Failed to initialize recipe system:', error);
       throw error;
     }
   }
 
-  // 创建配方
+  // Create recipe
   async createRecipe(
     recipeKey: Keypair,
     name: string,
@@ -449,12 +442,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('创建配方失败:', error);
+      console.error('Failed to create recipe:', error);
       throw error;
     }
   }
 
-  // 批准配方
+  // Approve recipe
   async approveRecipe(recipeAddress: PublicKey, isApproved: boolean): Promise<string> {
     this.checkPrograms();
     
@@ -478,12 +471,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('批准配方失败:', error);
+      console.error('Failed to approve recipe:', error);
       throw error;
     }
   }
 
-  // 开始制作
+  // Start crafting
   async startCrafting(recipeAddress: PublicKey): Promise<string> {
     this.checkPrograms();
     
@@ -507,12 +500,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('开始制作失败:', error);
+      console.error('Failed to start crafting:', error);
       throw error;
     }
   }
 
-  // 完成制作
+  // Complete crafting
   async completeCrafting(recipeAddress: PublicKey): Promise<string> {
     this.checkPrograms();
     
@@ -535,12 +528,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('完成制作失败:', error);
+      console.error('Failed to complete crafting:', error);
       throw error;
     }
   }
 
-  // 查询配方信息
+  // Get recipe information
   async getRecipe(recipeAddress: PublicKey): Promise<RecipeData> {
     this.checkPrograms();
     
@@ -548,14 +541,14 @@ class SolanaClient {
       const recipe = await this.recipeProgram!.account.recipe.fetch(recipeAddress);
       return recipe as unknown as RecipeData;
     } catch (error) {
-      console.error('查询配方失败:', error);
+      console.error('Failed to get recipe information:', error);
       throw error;
     }
   }
 
-  // ========== 合成系统接口 ==========
+  // ========== Crafting system interface ==========
 
-  // 初始化合成系统
+  // Initialize crafting system
   async initializeCraftingSystem(): Promise<string> {
     this.checkPrograms();
     
@@ -579,12 +572,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('初始化合成系统失败:', error);
+      console.error('Failed to initialize crafting system:', error);
       throw error;
     }
   }
 
-  // 开始高级合成
+  // Start advanced crafting
   async startAdvancedCrafting(
     recipeAddress: PublicKey,
     recipeCraftingAddress: PublicKey,
@@ -600,8 +593,8 @@ class SolanaClient {
     const remainingAccounts = materialInputs.flatMap(input => {
       const materialMintPubkey = input.materialMint;
       const amountKey = new Keypair();
-      // 使用一个Keypair的公钥来存储数量（这是一个hack，实际上不推荐这么做）
-      // 在实际实现中，应该使用更合适的方式传递参数
+      // Use a Keypair's public key to store quantity (this is a hack, and not recommended in practice)
+      // In a real implementation, a more appropriate way to pass parameters should be used
       const amountBytes = Buffer.alloc(32);
       amountBytes.writeBigUInt64LE(BigInt(input.amount), 0);
       // @ts-ignore
@@ -640,12 +633,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('开始高级合成失败:', error);
+      console.error('Failed to start advanced crafting:', error);
       throw error;
     }
   }
 
-  // 验证材料
+  // Verify materials
   async verifyMaterials(
     craftingRecordAddress: PublicKey,
     materialTokenAccounts: { mint: PublicKey, tokenAccount: PublicKey }[]
@@ -679,12 +672,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('验证材料失败:', error);
+      console.error('Failed to verify materials:', error);
       throw error;
     }
   }
 
-  // 消耗材料
+  // Consume materials
   async consumeMaterials(
     craftingRecordAddress: PublicKey,
     materialTransfers: { fromAccount: PublicKey, toAccount: PublicKey }[]
@@ -723,12 +716,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('消耗材料失败:', error);
+      console.error('Failed to consume materials:', error);
       throw error;
     }
   }
 
-  // 完成高级合成
+  // Complete advanced crafting
   async completeAdvancedCrafting(
     craftingRecordAddress: PublicKey,
     recipeCraftingAddress: PublicKey,
@@ -778,12 +771,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('完成高级合成失败:', error);
+      console.error('Failed to complete advanced crafting:', error);
       throw error;
     }
   }
 
-  // 查询合成记录
+  // Get crafting record
   async getCraftingRecord(craftingRecordAddress: PublicKey): Promise<CraftingData> {
     this.checkPrograms();
     
@@ -791,14 +784,14 @@ class SolanaClient {
       const craftingRecord = await this.craftingProgram!.account.craftingRecord.fetch(craftingRecordAddress);
       return craftingRecord as unknown as CraftingData;
     } catch (error) {
-      console.error('查询合成记录失败:', error);
+      console.error('Failed to get crafting record:', error);
       throw error;
     }
   }
 
-  // ========== 工会系统接口 ==========
+  // ========== Guild system interface ==========
 
-  // 初始化工会系统
+  // Initialize guild system
   async initializeGuildSystem(): Promise<string> {
     this.checkPrograms();
     
@@ -822,12 +815,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('初始化工会系统失败:', error);
+      console.error('Failed to initialize guild system:', error);
       throw error;
     }
   }
 
-  // 创建工会
+  // Create guild
   async createGuild(
     guildKeypair: Keypair,
     name: string,
@@ -868,12 +861,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('创建工会失败:', error);
+      console.error('Failed to create guild:', error);
       throw error;
     }
   }
 
-  // 加入工会
+  // Join guild
   async joinGuild(
     guildAddress: PublicKey,
     inviterPubkey: PublicKey,
@@ -907,12 +900,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('加入工会失败:', error);
+      console.error('Failed to join guild:', error);
       throw error;
     }
   }
 
-  // 向工会贡献
+  // Contribute to guild
   async contributeToGuild(
     guildAddress: PublicKey,
     membershipAddress: PublicKey,
@@ -939,12 +932,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('向工会贡献失败:', error);
+      console.error('Failed to contribute to guild:', error);
       throw error;
     }
   }
 
-  // 提升工会成员
+  // Promote guild member
   async promoteMember(
     guildAddress: PublicKey,
     membershipToPromote: PublicKey,
@@ -968,12 +961,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('提升成员失败:', error);
+      console.error('Failed to promote member:', error);
       throw error;
     }
   }
 
-  // 创建工会任务
+  // Create guild quest
   async createGuildQuest(
     guildAddress: PublicKey,
     creatorMembership: PublicKey,
@@ -1012,12 +1005,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('创建工会任务失败:', error);
+      console.error('Failed to create guild quest:', error);
       throw error;
     }
   }
 
-  // 接受工会任务
+  // Accept guild quest
   async acceptGuildQuest(
     guildAddress: PublicKey,
     questAddress: PublicKey,
@@ -1039,12 +1032,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('接受工会任务失败:', error);
+      console.error('Failed to accept guild quest:', error);
       throw error;
     }
   }
 
-  // 完成工会任务
+  // Complete guild quest
   async completeGuildQuest(
     guildAddress: PublicKey,
     questAddress: PublicKey,
@@ -1073,12 +1066,12 @@ class SolanaClient {
       
       return tx;
     } catch (error) {
-      console.error('完成工会任务失败:', error);
+      console.error('Failed to complete guild quest:', error);
       throw error;
     }
   }
 
-  // 查询工会信息
+  // Get guild information
   async getGuild(guildAddress: PublicKey): Promise<GuildData> {
     this.checkPrograms();
     
@@ -1086,12 +1079,12 @@ class SolanaClient {
       const guild = await this.guildProgram!.account.guild.fetch(guildAddress);
       return guild as unknown as GuildData;
     } catch (error) {
-      console.error('查询工会失败:', error);
+      console.error('Failed to get guild information:', error);
       throw error;
     }
   }
 
-  // 查询成员身份
+  // Get membership information
   async getMembership(membershipAddress: PublicKey): Promise<MembershipData> {
     this.checkPrograms();
     
@@ -1099,12 +1092,12 @@ class SolanaClient {
       const membership = await this.guildProgram!.account.membership.fetch(membershipAddress);
       return membership as unknown as MembershipData;
     } catch (error) {
-      console.error('查询成员身份失败:', error);
+      console.error('Failed to get membership information:', error);
       throw error;
     }
   }
 
-  // 查询工会任务
+  // Get guild quest information
   async getGuildQuest(questAddress: PublicKey): Promise<GuildQuestData> {
     this.checkPrograms();
     
@@ -1112,28 +1105,28 @@ class SolanaClient {
       const quest = await this.guildProgram!.account.guildQuest.fetch(questAddress);
       return quest as unknown as GuildQuestData;
     } catch (error) {
-      console.error('查询工会任务失败:', error);
+      console.error('Failed to get guild quest information:', error);
       throw error;
     }
   }
 
-  // ========== 辅助函数 ==========
+  // ========== Helper functions ==========
 
-  // 查找Metadata地址
+  // Find Metadata address
   async findMetadataAddress(mint: PublicKey): Promise<PublicKey> {
-    return (await PublicKey.findProgramAddress(
+    return PublicKey.findProgramAddressSync(
       [
         Buffer.from('metadata'),
         TOKEN_METADATA_PROGRAM_ID.toBuffer(),
         mint.toBuffer(),
       ],
       TOKEN_METADATA_PROGRAM_ID
-    ))[0];
+    )[0];
   }
 
-  // 查找Edition地址
+  // Find Edition address
   async findEditionAddress(mint: PublicKey): Promise<PublicKey> {
-    return (await PublicKey.findProgramAddress(
+    return PublicKey.findProgramAddressSync(
       [
         Buffer.from('metadata'),
         TOKEN_METADATA_PROGRAM_ID.toBuffer(),
@@ -1141,7 +1134,7 @@ class SolanaClient {
         Buffer.from('edition'),
       ],
       TOKEN_METADATA_PROGRAM_ID
-    ))[0];
+    )[0];
   }
 }
 

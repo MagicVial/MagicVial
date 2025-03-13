@@ -14,7 +14,7 @@ import {
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
 
-// 默认导入钱包适配器样式
+// Default import for wallet adapter styles
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 interface SolanaWalletProvidersProps {
@@ -22,14 +22,14 @@ interface SolanaWalletProvidersProps {
 }
 
 export const SolanaWalletProviders: FC<SolanaWalletProvidersProps> = ({ children }) => {
-  // 可以设置为 'mainnet-beta', 'testnet', 'devnet' 或 自定义 RPC URL
+  // Can be set to 'mainnet-beta', 'testnet', 'devnet' or custom RPC URL
   const network = WalletAdapterNetwork.Devnet;
 
-  // 也可以提供自定义 RPC 端点
+  // You can also provide a custom RPC endpoint
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
-  // @solana/wallet-adapter-wallets 包含所有钱包适配器
-  // 以及一些用于初始化常见钱包的辅助函数
+  // @solana/wallet-adapter-wallets includes all the adapters
+  // and some helper functions for initializing common wallets
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),

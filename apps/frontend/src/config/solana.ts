@@ -1,89 +1,86 @@
-import { clusterApiUrl } from '@solana/web3.js';
+import { Cluster } from '@solana/web3.js';
 
-// 集群选项
-export enum ClusterType {
+// Cluster options
+export enum SolanaCluster {
   MAINNET = 'mainnet-beta',
   TESTNET = 'testnet',
   DEVNET = 'devnet',
-  LOCALNET = 'localnet'
+  LOCALNET = 'localnet',
 }
 
-// 当前选择的集群
-const DEFAULT_CLUSTER = process.env.REACT_APP_CLUSTER as ClusterType || ClusterType.DEVNET;
+// Currently selected cluster
+export const DEFAULT_CLUSTER: Cluster = (process.env.REACT_APP_SOLANA_CLUSTER as Cluster) || SolanaCluster.DEVNET;
 
-// 集群端点配置
-const ENDPOINTS = {
-  [ClusterType.MAINNET]: process.env.REACT_APP_MAINNET_ENDPOINT || clusterApiUrl('mainnet-beta'),
-  [ClusterType.TESTNET]: process.env.REACT_APP_TESTNET_ENDPOINT || clusterApiUrl('testnet'),
-  [ClusterType.DEVNET]: process.env.REACT_APP_DEVNET_ENDPOINT || clusterApiUrl('devnet'),
-  [ClusterType.LOCALNET]: 'http://localhost:8899',
-};
+// Cluster endpoint configuration
+export const CLUSTER_ENDPOINT = process.env.REACT_APP_SOLANA_API_URL || {
+  [SolanaCluster.MAINNET]: 'https://api.mainnet-beta.solana.com',
+  [SolanaCluster.TESTNET]: 'https://api.testnet.solana.com',
+  [SolanaCluster.DEVNET]: 'https://api.devnet.solana.com',
+  [SolanaCluster.LOCALNET]: 'http://localhost:8899',
+}[DEFAULT_CLUSTER];
 
-// RPC节点端点
-export const CLUSTER_ENDPOINT = ENDPOINTS[DEFAULT_CLUSTER];
+// RPC node endpoint
+export const RPC_ENDPOINT = CLUSTER_ENDPOINT;
 
-// 项目程序ID
-export const PROGRAM_ID = process.env.REACT_APP_PROGRAM_ID || ''; // 实际生产中需要填写真实的程序ID
+// Project program ID
+export const PROGRAM_ID = process.env.REACT_APP_PROGRAM_ID || ''; // Actual program ID should be populated in production
 
-// 启用自动确认
-export const AUTO_APPROVE_TRANSACTION = process.env.REACT_APP_AUTO_APPROVE_TRANSACTION === 'true';
+// Enable auto-confirmation
+export const AUTO_CONFIRM = true;
 
-// 交易确认确认数
-export const TRANSACTION_CONFIRMATIONS = Number(process.env.REACT_APP_TRANSACTION_CONFIRMATIONS || 1);
+// Transaction confirmation count
+export const CONFIRMATION_COUNT = 1;
 
-// 超时设置（毫秒）
-export const TIMEOUT = Number(process.env.REACT_APP_TIMEOUT || 60000);
+// Timeout setting (ms)
+export const REQUEST_TIMEOUT = 60000;
 
-// 记录当前网络配置
-console.log(`连接到Solana ${DEFAULT_CLUSTER} 网络: ${CLUSTER_ENDPOINT}`);
+// Log current network config
+console.log(`Connected to Solana ${DEFAULT_CLUSTER} network: ${CLUSTER_ENDPOINT}`);
 
-// 导出当前网络类型
-export const CLUSTER = DEFAULT_CLUSTER;
+// Export current network type
+export const IS_PRODUCTION = DEFAULT_CLUSTER === SolanaCluster.MAINNET;
 
-// 钱包配置
+// Wallet configuration
 export const WALLET_CONFIG = {
-  autoConnect: true,                    // 自动连接最近使用的钱包
-  reuseConnection: true,               // 重用上一次的连接
-  connectTimeoutMs: 10000,             // 连接超时时间（毫秒）
-  disconnectTimeoutMs: 5000,           // 断开连接超时时间（毫秒）
-  reconnectionDelayMs: 1000,           // 重连延迟时间（毫秒）
-  maxReconnectionAttempts: 5,          // 最大重连尝试次数
-};
+  autoConnect: true,                    // Automatically connect to the most recently used wallet
+  reuseConnection: true,               // Reuse previous connection
+  skipModal: false,                    // Don't skip the modal if there's only one wallet
+}
 
-// 交易选项
+// Transaction options
 export const TX_OPTIONS = {
-  maxRetries: 3,                       // 最大重试次数
-  skipPreflight: false,                // 跳过预检
-  preflightCommitment: 'confirmed',    // 预检承诺级别
-  commitment: 'confirmed',             // 承诺级别
+  maxRetries: 3,                       // Maximum retry attempts
+  skipPreflight: false,                // Skip preflight check
+  preflightCommitment: 'confirmed',    // Preflight commitment level
+  commitment: 'confirmed',             // Commitment level
 };
 
-// NFT配置
+// NFT configuration
 export const NFT_CONFIG = {
   metaplexUrl: 'https://api.metaplex.solana.com/',
   arweaveUrl: 'https://arweave.net/',
 };
 
-// 导出网络配置函数
+// Export network configuration function
 export function getNetworkConfig() {
   return {
-    cluster: CLUSTER,
+    cluster: DEFAULT_CLUSTER,
     endpoint: CLUSTER_ENDPOINT,
     programId: PROGRAM_ID,
   };
 }
 
-// 导出整合后的所有配置
+// Export all configurations
 export const SolanaConfig = {
-  cluster: CLUSTER,
+  cluster: DEFAULT_CLUSTER,
   endpoint: CLUSTER_ENDPOINT,
   programId: PROGRAM_ID,
   wallet: WALLET_CONFIG,
   transaction: TX_OPTIONS,
   nft: NFT_CONFIG,
-  autoApprove: AUTO_APPROVE_TRANSACTION,
-  confirmations: TRANSACTION_CONFIRMATIONS,
-  timeout: TIMEOUT,
+  autoApprove: AUTO_CONFIRM,
+  confirmations: CONFIRMATION_COUNT,
+  timeout: REQUEST_TIMEOUT,
 };
 
 export default SolanaConfig; 

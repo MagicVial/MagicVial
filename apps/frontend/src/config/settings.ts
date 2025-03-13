@@ -93,7 +93,7 @@ export const APP = {
   description: 'Decentralized Alchemy Platform on Solana',
   version: '0.1.0',
   website: 'https://magicvial.xyz',
-  twitter: 'https://twitter.com/magicvial',
+  twitter: 'https://x.com/MagicVial_',
   discord: 'https://discord.gg/magicvial',
   github: 'https://github.com/magicvial'
 }; 

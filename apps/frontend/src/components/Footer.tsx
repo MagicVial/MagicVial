@@ -50,16 +50,16 @@ const Footer: React.FC = () => {
         <FooterSection>
           <FooterTitle>Contact Us</FooterTitle>
           <SocialLinks>
-            <SocialLink href="https://twitter.com/" target="_blank" rel="noopener noreferrer">
+            <SocialLink href="https://x.com/MagicVial_" target="_blank" rel="noopener noreferrer">
               <SocialIcon>𝕏</SocialIcon>
             </SocialLink>
-            <SocialLink href="https://discord.com/" target="_blank" rel="noopener noreferrer">
+            <SocialLink href="https://discord.gg/magicvial" target="_blank" rel="noopener noreferrer">
               <SocialIcon>𝔻</SocialIcon>
             </SocialLink>
-            <SocialLink href="https://t.me/" target="_blank" rel="noopener noreferrer">
+            <SocialLink href="https://t.me/MagicVial" target="_blank" rel="noopener noreferrer">
               <SocialIcon>𝕋</SocialIcon>
             </SocialLink>
-            <SocialLink href="https://github.com/" target="_blank" rel="noopener noreferrer">
+            <SocialLink href="https://github.com/MagicVial" target="_blank" rel="noopener noreferrer">
               <SocialIcon>𝔾</SocialIcon>
             </SocialLink>
           </SocialLinks>
